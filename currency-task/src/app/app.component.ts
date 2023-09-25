@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 
 interface ExchangeRateData {
-  conversion_rate: { [currency: string]: number };
+  conversion_rate: number;
 }
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -24,9 +24,16 @@ export class AppComponent {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.http.get(`${this.baseUrl}/latest/USD`).subscribe(() => {
-      this.currencies = this.mainCurrencies;
-    });
+    this.http
+      .get(`${this.baseUrl}/latest/USD`)
+      .pipe(
+        catchError(() => {
+          throw new Error('Failed to fetch currency data');
+        })
+      )
+      .subscribe(() => {
+        this.currencies = this.mainCurrencies;
+      });
 
     this.updateCurrency2();
   }
@@ -37,11 +44,14 @@ export class AppComponent {
         `${this.baseUrl}/pair/${this.selectedCurrency1}/${this.selectedCurrency2}`
       )
       .pipe(
-        map((data: any) => {
+        catchError(() => {
+          throw new Error('Failed to fetch exchange rate data');
+        }),
+        map((data: ExchangeRateData) => {
           return this.amount1 * data.conversion_rate;
         })
       )
-      .subscribe((result: number) => {
+      .subscribe((result) => {
         this.amount2 = result;
       });
   }

@@ -1,6 +1,11 @@
 <div class="currency-converter">
   <h1>Currency Converter</h1>
-  <input type="number" [(ngModel)]="amount1" (input)="updateCurrency2()" />
+  <input
+    class="input-amount"
+    type="number"
+    [(ngModel)]="amount1"
+    (input)="updateCurrency2()"
+  />
 
   <div class="selects">
     <div class="input-container">
